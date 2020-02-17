@@ -203,4 +203,16 @@ Spring基于`模板方法模式`，创建JdbcTemplate，其有两个主要的职
   - 对事务进行有限的控制，比如在当前事务中创建内部嵌套事务、通过setRollbackOnly()方法使事务回滚
 
 ## Web MVC框架
+
+>Spring MVC对请求处理期间涉及的各种关注点进行了合理而完全的分离，并且明确设置了相应的角色用于建模并处理整个生命周期中的各个关注点。
+
+- DispatcherServlet：拦截所有的请求
+- HandlerMapping：识别请求应该又哪一个controller来处理
+- Controller：Web请求的具体处理者
+- ModelAndView：由controller返回，持有数据和视图信息
+- ViewResolver：决定哪一个视图来进行渲染
+- View：视图，执行具体的渲染逻辑，生成最后的输出结果
+
+Spring MVC中个角色交互图
+![MVC中个角色交互图](https://img-blog.csdn.net/20181022214913888?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjYyOTY4/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
   
