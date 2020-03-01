@@ -147,3 +147,55 @@
   - 用于并发线程数的控制
   - 用`acquire()`方法获取信号量，用`release()`方法释放信号量
   - 例子：六个车子抢三个车位
+
+## 阻塞队列
+
+- 可以结合`消费线程`和`生产线程`实现生产者和消费者模式
+- 如果不使用这个工具，我们在实现生产者和消费者模式的时候，我们需要自己精确控制线程的`wait()`和`notify()`。这个工具大大减少了我们实现的复杂度，我们现在不需要去关心这些细节了。
+
+- 接口`BlockingQueue`，父接口是Colleciton，有七个实现类
+  - `ArrayBlockingQueue`：数组结构，有界
+  - `LinkedBlockingQueue`：链表结构，有界（Integer.MAX_VALUE）但接近无界
+  - `SynchronousQueue`：单个元素的队列
+  - DelayQueue
+  - LinkedTransferQueue
+  - PriorityBlockingQueue
+  - LinkedBlocking`Deque`：双向阻塞队列
+
+- `BlockingQueue`核心方法
+  - 第一组：超过预定值会抛出异常：`add(e)`、`remove()`。检查队头元素：`element()`
+  - 第二组：超过预定值不会抛出异常：`offer(e)`，`poll()`。检查队头元素：`peek()`
+  - 第三组：超过预定值会阻塞：`put(e)`,`take()`
+  - 第四组：可以指定阻塞的超时时间：`offer(e, time, unit)`,`poll(time, unit)`
+
+- `SynchronousQueue`
+  - 每一个put操作必须等待一个take操作，否则不能再继续添加元素，反之亦然
+
+- 使用场景
+  - 生产者消费者模式
+  - 线程池
+  - 消息中间件
+
+- 生产者与消费者的实现方式
+  - `synchronized`版本，使用`wait()`和`notify()`
+  - `lock`版本，使用`await()`和`signalAll()`
+  - 阻塞队列版本
+
+- `synchronized`和`lock`有什么区别
+  - 原始构成
+    - synchronized是关键字，属于JVM层面，底层是monitor对象
+    - lock是具体类，是api层面的
+  - 使用方法
+    - synchronize不需要用户手动释放锁
+    - lock需要用户手动释放锁，否则可能造成死锁
+  - 等待是否可中断
+    - synchronize不可中断，只会正常完成或者抛异常
+    - reentrantlock可中断
+      - 设置超时方法tryLock(timeout timeunit)
+      - lockInterruptibly()配合interrupt()方法可中断
+  - 加锁是否公平
+    - reentrantlock有公平锁选项
+  - 锁绑定多个条件Condition
+    - synchronized没有条件，只能随机唤醒一个线程，或者唤醒全部线程
+    - reentrantlock可以使用`Condition`实现精确唤醒，也即控制condition的await()和signal()
+  
