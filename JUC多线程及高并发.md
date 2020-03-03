@@ -280,3 +280,14 @@
   - 解决
     - jps查看当前运行的线程及其线程号
     - jstack 加上线程ID号，查看栈内情况
+
+      ```java
+      Found one Java-level deadlock:
+      =============================
+      "bbb":
+        waiting to lock monitor 0x000000001d4035a8 (object 0x000000076b19cc68, a java.lang.String),
+        which is held by "aaa"
+      "aaa":
+        waiting to lock monitor 0x000000001d400bb8 (object 0x000000076b19cca0, a java.lang.String),
+        which is held by "bbb"
+      ```
