@@ -198,4 +198,85 @@
   - 锁绑定多个条件Condition
     - synchronized没有条件，只能随机唤醒一个线程，或者唤醒全部线程
     - reentrantlock可以使用`Condition`实现精确唤醒，也即控制condition的await()和signal()
+
+## Callable
+
+- 进行多线程编程的四种选择
+  - 继承`Thread`类
+  - 实现`Runnable`接口
+  - 实现`Callable`接口
+  - 线程池
+
+- `Runnable`和`Callable`的区别
+  - `Callable`有返回值
+  - `Callable`的call方法有受检异常，而`Runnable`的run方法没有受检异常
   
+- callable可以让多个任务并行计算，然后再汇总结果
+- callable -> FutureTask -> Thread
+- callable的get方法会阻塞
+
+- 多个线程去抢`FutureTask`，只会计算一次
+
+## 线程池
+
+- 为什么用线程池
+  - 线程复用：减少开销、提高响应速度
+  - 控制最大并发数
+  - 管理线程：进行统一的分配、调优、监控
+
+- 五种常用的线程池
+  - `Executors.newFixedThreadPool(int nThreads)`：固定数值的线程
+  - `Executors.newSingleThreadExecutor()`：只有一个线程，保证所有任务按照指定顺序执行
+  - `Executors.newCachedThreadPool()`：多个线程，可扩充
+  - 以上三个线程池的底层都是`ThreadPoolExecutor`
+  - Executors.newWorkStealingPool()：Java8的新线程池
+  - Executors.newScheduledThreadPool(int corePoolSize)：带时间调度
+
+- 七大参数
+  - `int corePoolSize`：线程池中的常驻核心线程数
+  - `int maximumPoolSize`：线程池能够容纳同时执行的最大线程数，必须大于1
+  - `long keepAliveTime`：多余的空闲线程的存活时间
+  - `TimeUnit unit`：keepAliveTime的单位
+  - `BlockingQueue<Runnable> workQueue`：任务队列，被提交但尚未被执行的任务
+  - `ThreadFactory threadFactory`：生成线程池中工作线程的工厂
+  - `RejectedExecutionHandler handler`：拒绝策略，表示当队列满了并且工作线程大于等于线程池的最大线程数，拒绝接收新请求的策略
+
+- 底层工作原理
+  
+  ![底层工作原理](https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1583253247270&di=c1951943514eb2bd2cc35c082a585917&imgtype=0&src=http%3A%2F%2Faliyunzixunbucket.oss-cn-beijing.aliyuncs.com%2Fjpg%2F4a237fd689fcf62970614142138e1011.jpg%3Fx-oss-process%3Dimage%2Fresize%2Cp_100%2Fauto-orient%2C1%2Fquality%2Cq_90%2Fformat%2Cjpg%2Fwatermark%2Cimage_eXVuY2VzaGk%3D%2Ct_100)
+
+- 线程池的拒绝策略
+  - 触发条件：线程数达到`maximumPoolSize`，而且任务队列`workQueue`也满了
+  - JDK的内置策略：
+    - `AbortPolicy`：默认的拒绝策略，直接抛出`RejectedExecutionException`
+    - `CallerRunsPolicy`：不抛弃任务、不抛异常。而是将某些任务回退到调用者（比如main线程提交，那就回退到main线程）那里处理。
+    - `DiscardOldestPolicy`：抛弃*队列中*等待最久的任务，尝试再次提交当前任务
+    - `DiscardPolicy`：直接丢弃*新*任务
+
+- 阿里巴巴实践建议
+  - 线程不用手动创建，而且应该使用线程池获取
+  - 线程池不允许使用`Executors`去创建，原因如下
+    - `FixedThreadPool`和`SingleThreadPool`允许的请求队列长度为Integer.MAX_VALUE，可能会堆积大量的请求，从而导致OOM。
+    - `CachedThreadPool`和`ScheduledThreadPool`允许的创建线程数量为Integer.MAX_VALUE,可能会创建大量的线程，从而导致OOM。
+  - 线程池应该通过`ThreadPoolExecutor`的方式创建
+
+- 如何合理配置线程池的线程数量（maximumPoolSize）
+  - CPU密集型
+    - 特点：任务需要大量的运算，而没有阻塞，CPU一直全速运行
+    - 一般公式：（CPU核数 + 1个线程）的线程池
+  - I/O密集型
+    - 特点：并不是一直在运行任务，会有大量的阻塞，需要多配置线程数
+    - 一般公式：CPU核数 * 2
+    - 大厂公式：CPU核数/(1-阻塞系数)，阻塞系数0.8~0.9
+      - 举例：8核CPU：8/(1-0.9) = 80个线程数
+
+- 死锁编码以及定位分析
+  - 现象：两个线程因为争抢资源而**互相等待**
+  - 产生死锁的原因
+    - 系统资源不足
+    - 进程运行推进的顺序不合适
+    - 资源分配不当
+  - 代码演示：A线程持有lockA等待lockB,B线程持有lockB等待lockA
+  - 解决
+    - jps查看当前运行的线程及其线程号
+    - jstack 加上线程ID号，查看栈内情况
