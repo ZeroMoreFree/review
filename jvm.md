@@ -92,7 +92,7 @@
     ```java
     bool UseLargePagesInMetaspace = false
     等于号前面有冒号的，表示这个值被修改过，不是jvm默认值
-    bool UseLargePagesIndividualAllocation  := false 
+    bool UseLargePagesIndividualAllocation  := false
     ```
 
     - `java -XX:+PrintFlagsFinal` 主要查看最终值
@@ -109,8 +109,48 @@
   - `-Xmx`：等价于`-XX:MaxHeapSize`，最大分配内存，默认为物理内存的1/4
   - `-Xss`：等价于`-XX:ThreadStackSize`,设置单个线程栈的大小，一般默认512k~1024k
   - `-Xmn`：设置`年轻代`的大小
-  - `-XX:MetaspaceSize`
-  - `-XX:PrintGCDetails`
-  - `-XX:SurvivorRatio`
-  - `-XX:NewRatio`
-  - `-XX:MaxTenuringThreshold`
+  - `-XX:MetaspaceSize`：设置元空间的大小，默认21M左右
+  - `-XX:PrintGCDetails`：输出GC的详细日志信息
+  - `-XX:SurvivorRatio`：设置新生代中`eden`和`s0/s1`空间的比例，默认 8:1:1
+  - `-XX:NewRatio`:设置年轻代与老年代在堆结构的占比。
+  - `-XX:MaxTenuringThreshold`：设置垃圾的最大年龄，默认十五次。可设置的值为0~15
+
+## 强软弱虚引用
+
+![强软弱虚引用](http://dl.iteye.com/upload/attachment/193935/76e46aa5-1ffe-3111-9f16-c925092176f6.gif)
+
+- 强引用Reference
+  - 把一个对象赋值给一个引用变量，该变量就是强引用
+  - 就算是出现了`OOM`也不会对强引用进行回收
+- 软引用SoftReference
+  - 当系统内存充足时不会被回收，反之会被回收
+  - 适用场景：读取大量的图片，图片对象可以使用软引用，避免OOM
+- 弱引用WeakReference
+  - 只要发生GC，就会被回收
+  - `WeakHashMap`
+    - 当key被设置为null，那么那个`entry`就会被GC回收
+- 虚引用PhantomReference
+  - 形同虚设，任何时候都可能被垃圾回收器回收掉
+  - 必须配合引用队列（ReferenceQueue）进行使用
+  - 意义：在对象被回收的时候，收到一个通知，或添加后续处理。
+- 引用队列ReferenceQueue
+  - 可以让引用进行注册，引用被GC回收之后，该队列会保留引用的信息
+
+```Java
+  //强引用
+  Object obj = new Object();
+
+  //软引用
+  SoftReference<Object> softReference = new SoftReference<>(obj);
+  //弱引用
+  WeakReference<Object> weakReference = new WeakReference<>(obj);
+
+  //软引用和弱引用的适用场景
+  //用一个HashMap来保存图片的路径和相应图片对象关联的软引用之间的映射关系
+  Map<String,SoftReference<Object>> imageCache = new HashMap<>();
+
+  //引用队列
+  ReferenceQueue<Object> referenceQueue = new ReferenceQueue<>();
+  //虚引用
+  PhantomReference<Object> phantomReference = new PhantomReference<>(obj,referenceQueue);
+```
