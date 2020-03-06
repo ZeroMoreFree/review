@@ -291,3 +291,26 @@
         waiting to lock monitor 0x000000001d400bb8 (object 0x000000076b19cca0, a java.lang.String),
         which is held by "bbb"
       ```
+
+## 吊打面试官系列的补充
+
+![吊打面试官系列的补充](https://tva1.sinaimg.cn/large/00831rSTly1gcjcyyn4k2j30r80mitam.jpg)
+
+- `synchronized`怎么保证线程安全
+  - 使用的是JVM中的`Monitor`对象，对于一个被加锁的对象来说，其内存中的`对象头` 指向了monitor对象的起始地址，对象头中的`Mark Word`保存了锁标志位
+  - Monitor 中有两个队列分别是EntryList和WaitList，主要是用来存放进入及等待获取锁的线程
+  - 同步方法和同步代码块底层都是通过monitor来实现同步的
+    - 同步方法是通过方法中的access_flags中设置ACC_SYNCHRONIZED标志来实现
+    - 同步代码块是通过monitorenter和monitorexit来实现
+- `synchronized`优化加锁过程
+
+  ![优化加锁过程](https://tva1.sinaimg.cn/large/00831rSTly1gch2ggziuej30eo01idg8.jpg)
+
+- `AbstractQueuedSynchronizer`
+  - 简称`AQS`，是实现`ReentrantLock`的基础
+  - AQS 有一个 state 标记位，值为1 时表示有线程占用，其他线程需要进入到`同步队列`等待
+  - 当获得锁的线程需要等待某个条件时，会进入 `condition` 的`等待队列`
+
+    ![AQS](https://tva1.sinaimg.cn/large/00831rSTly1gcetubzrwmj30b50b4mxo.jpg)
+
+- `ReentrantLock`是独占锁，`Semaphore` 是共享锁
