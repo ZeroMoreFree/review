@@ -283,3 +283,67 @@
   - 与`CMS`相比的优势
     - 没有内存碎片
     - 可以设置预想停顿时间
+
+## Linux命令
+
+- 整机：top
+  - 看进程CPU使用率和内存情况
+- CPU：vmstat
+  - 查看CPU（包括但不限于）
+  - 查看额外
+- 内存：free
+  - pidstat -p 进程号 -r 采样间隔秒数
+- 硬盘：df
+  - 查看磁盘剩余空间
+- 磁盘IO：iostat
+- 网络IO：ifstat
+
+## 问题分析和故障排查
+
+- 生产环境出现CPU占用过高
+  - 找出CPU占比最高的（用top命令）
+  - 定位是什么后台程序占用的（用ps -ef 或者 jps）
+  - 定位到具体的线程
+    - ps -mp 进程 -o THREAD,tid,time
+    - 参数解释
+      - -m：显示所有的线程
+      - -p：pid进程使用cpu的时间
+      - -o：该参数后是用户自定义格式
+  - 定位到具体的代码
+    - 将定位到的线程ID转换为16进制格式
+      - 可以使用计算器计算出来，比如定位到线程ID为5102，用计算器就可以知道其16制值是13ee
+    - jstack 进程ID | grep tid(16进制线程ID) -A60（打印出前六十行）
+
+## GitHub骚操作
+
+- 常用词
+  - watch：会持续收到该项目的动态
+  - fork：复制项目到自己的仓库中
+  - star：点赞
+  - clone：将项目拷贝至本地
+  - follow：关注感兴趣的作者，会收到他们的动态
+- `in`关键词
+  - 用于限制搜索
+  - 选项
+    - `zeno in:name`：项目**名称**包含`zeno`的
+    - `zeno in:description`：项目**描述**包含`zeno`的
+    - `zeno in:readme`：项目**readme**文件中包含`zeno`的
+  - 组合使用：`zeno in:name,description,readme`
+- 用`stars`过滤查找
+  - 过滤`star`数目大于等于5000的项目：`zeno stars:>=5000`
+  - 过滤`star`数目在1000到5000之间的项目：`zeno stars:1000...5000`
+- 用`forks`过滤查找
+  - 过滤`fork`数目大于等于5000的项目：`zeno forks:>=5000`
+  - 过滤`fork`数目在1000到5000之间的项目：`zeno forks:1000...5000`
+- 用`awesome`加强搜索
+  - 一些收集了学习、工具、书籍类的好项目被收纳进了`awesome`列表，我们可以通过`awesome xxx`搜索出对应的列表
+- 高亮某一行的代码
+  - 具体某一行：`项目地址#L第几行`
+  - 具体某些行区间：`项目地址#L第几行开始-#L第几行结束`
+- 快捷键
+  - 在项目首页按下`t`，可以查看项目的类列表
+  - 全部快捷键地址：<https://help.github.com/en/github/getting-started-with-github/keyboard-shortcuts>
+- 搜索某个地区的大佬
+  - location
+  - language
+  - 北京地区的Java方向的用户：location:beijing language:java
