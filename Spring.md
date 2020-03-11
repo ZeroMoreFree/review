@@ -207,9 +207,11 @@ Spring基于`模板方法模式`，创建JdbcTemplate，其有两个主要的职
 >Spring MVC对请求处理期间涉及的各种关注点进行了合理而完全的分离，并且明确设置了相应的角色用于建模并处理整个生命周期中的各个关注点。
 
 - DispatcherServlet：拦截所有的请求
-- HandlerMapping：识别请求应该又哪一个controller来处理
-- Controller：Web请求的具体处理者
-- ModelAndView：由controller返回，持有数据和视图信息
+- HandlerMapping：返回HandlerExecutionChain
+- HandlerExecutionChain：包含了所有的Handler和HandlerIntercepter
+- HandlerAdapter：从`HandlerExecutionChain`中识别出应该使用什么handler
+- handler：具体处理者，controller就是一种handler
+- ModelAndView：由handler返回，持有数据和视图信息
 - ViewResolver：决定哪一个视图来进行渲染
 - View：视图，执行具体的渲染逻辑，生成最后的输出结果
 
